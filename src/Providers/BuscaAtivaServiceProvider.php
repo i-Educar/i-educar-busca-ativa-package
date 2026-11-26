@@ -19,6 +19,11 @@ class BuscaAtivaServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(dirname(__DIR__, 2).'/config/busca-ativa.php', 'busca-ativa');
+        // Fora de runningInConsole(): o check do Ambiente Laguna (HTTP) usa Artisan::all().
+        $this->commands([
+            DetectarInfrequenciaCommand::class,
+            BuscaAtivaDemoCommand::class,
+        ]);
     }
 
     public function boot(): void
@@ -34,10 +39,6 @@ class BuscaAtivaServiceProvider extends ServiceProvider
             if (\App\Support\Tenancy\PackageTenant::allows(self::PACKAGE)) {
                 $this->loadMigrationsFrom($root.'/database/migrations');
             }
-            $this->commands([
-                DetectarInfrequenciaCommand::class,
-                BuscaAtivaDemoCommand::class,
-            ]);
         }
 
         Route::middleware([
