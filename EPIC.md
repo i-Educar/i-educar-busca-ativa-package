@@ -6,7 +6,7 @@
 | TR Laguna | **5.3.158 · 5.3.173 · 5.3.204** (+ ponte 5.9 / apps) |
 | Prioridade | **P1** |
 | Nota atual (executivo) | **D → C (scaffold)** |
-| Fonte | `tmp/edital-ocr/MATRIZ-REQUISITOS-TR.md` |
+| Fonte | `packages/buriti/docs/laguna/MATRIZ-REQUISITOS-TR.md` |
 | Regra de ouro | Pregão Eletrônico 77/2026 · Laguna/SC · PoC ≥ 85% por módulo · gaps ≤ 30 dias |
 | Base atual | Legado `pmieducar.busca_ativa` (ActiveLooking) + novo schema `busca_ativa.*` |
 

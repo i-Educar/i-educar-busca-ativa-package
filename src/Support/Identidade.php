@@ -4,9 +4,9 @@ namespace iEducar\Packages\BuritiBuscaAtiva\Support;
 
 final class Identidade
 {
-    public const COR = '#9a3412';
-    public const DESTAQUE = '#c2410c';
-    public const COR_CLARA = '#fff7ed';
+    public const COR = '#a85f00';
+    public const DESTAQUE = '#c98900';
+    public const COR_CLARA = '#fff5e6';
     public const ICONE = 'fa-search';
     public const NOME = 'Busca Ativa';
     public const DESCRICAO = 'Infrequência, alertas e reintegração';

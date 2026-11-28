@@ -23,16 +23,16 @@ final class MenuFluxo
             [
                 'nome' => 'Operação',
                 'itens' => $filtrar([
-                    $item('painel', '1. Início', '/busca-ativa', 'fa-th-large'),
-                    $item('alertas', '2. Alertas', '/busca-ativa/alertas', 'fa-bell'),
-                    $item('processos', '3. Processos', '/busca-ativa/processos', 'fa-folder-open'),
+                    $item('painel', 'Início', '/busca-ativa', 'fa-th-large'),
+                    $item('alertas', 'Alertas', '/busca-ativa/alertas', 'fa-bell'),
+                    $item('processos', 'Processos', '/busca-ativa/processos', 'fa-folder-open'),
                 ]),
             ],
             [
                 'nome' => 'Governança',
                 'itens' => $filtrar([
-                    $item('configuracao', '4. Regras', '/busca-ativa/configuracao', 'fa-cog'),
-                    $item('relatorios', '5. Relatórios', '/busca-ativa/relatorios', 'fa-bar-chart'),
+                    $item('configuracao', 'Regras', '/configuracoes/modulos?modulo=busca-ativa', 'fa-cog'),
+                    $item('relatorios', 'Relatórios', '/busca-ativa/relatorios', 'fa-bar-chart'),
                 ]),
             ],
         ], static fn (array $g): bool => $g['itens'] !== []));

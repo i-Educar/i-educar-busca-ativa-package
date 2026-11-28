@@ -5,15 +5,15 @@
 @section('titulo-tela', 'Processos de busca ativa')
 @section('lead') Acompanhe cada aluno pelas etapas: contato, visita, encaminhamento, acompanhamento e retorno. @endsection
 @section('acoes-topo')
-    <a class="botao claro" href="{{ url('/busca-ativa/alertas') }}"><i class="fa fa-bell"></i> Alertas</a>
+    <a class="botao claro icone" href="{{ url('/busca-ativa/alertas') }}" title="Alertas" aria-label="Alertas"><i aria-hidden="true" class="fa fa-bell"></i></a>
 @endsection
 @section('conteudo')
 @php
     use iEducar\Packages\BuritiBuscaAtiva\Support\EtapasProcesso;
 @endphp
-<div class="bloco">
-    <h2><i class="fa fa-filter"></i> Filtrar</h2>
-    <form method="get" class="form-grid" action="{{ url('/busca-ativa/processos') }}">
+<div class="buriti-filtro-bloco">
+    <h2><i class="fa fa-filter"></i> Filtros</h2>
+    <form method="get" class="buriti-filtro" action="{{ url('/busca-ativa/processos') }}">
         <label>Etapa
             <select name="etapa">
                 <option value="">Todas</option>

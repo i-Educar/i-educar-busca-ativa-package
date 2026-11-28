@@ -4,8 +4,20 @@
 @section('icone-tela', 'fa-cog')
 @section('titulo-tela', 'Regras do módulo')
 @section('lead') Limites de faltas, frequência mínima, ponte com atendimento e cursos no radar. @endsection
+@section('acoes-topo')
+    <button type="submit" form="form-busca-config" class="botao primaria icone" title="Salvar" aria-label="Salvar"><i aria-hidden="true" class="fa fa-save"></i></button>
+@endsection
+@section('foco')
+<section class="buriti-foco">
+    <p class="buriti-foco-kicker">Radar</p>
+    <h2 class="buriti-foco-titulo">
+        {{ (int)($cfg['faltas_consecutivas_alerta'] ?? 0) }} faltas seguidas · {{ $cfg['frequencia_minima_percentual'] ?? '—' }}% mín.
+    </h2>
+    <p class="buriti-foco-texto">Ajuste limites e comportamento; salve pelo botão no topo.</p>
+</section>
+@endsection
 @section('conteudo')
-<form method="post" action="{{ url('/busca-ativa/configuracao') }}">
+<form method="post" action="{{ url('/busca-ativa/configuracao') }}" id="form-busca-config">
 @csrf
 <div class="bloco">
     <h2>Limites (TR 5.3.158 / 5.3.173)</h2>
@@ -46,6 +58,5 @@
         @endforeach
     </div>
 </div>
-<button class="botao" type="submit"><i class="fa fa-save"></i> Salvar configuração</button>
 </form>
 @endsection

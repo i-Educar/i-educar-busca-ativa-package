@@ -9,18 +9,18 @@
 @section('acoes-topo')
     <a class="botao claro" href="{{ url('/busca-ativa/alertas') }}">Voltar</a>
     @if(!empty($processoId))
-        <a class="botao" href="{{ url('/busca-ativa/processos/'.$processoId) }}"><i class="fa fa-folder-open"></i> Processo</a>
+        <a class="botao icone" href="{{ url('/busca-ativa/processos/'.$processoId) }}" title="Processo" aria-label="Processo"><i aria-hidden="true" class="fa fa-folder-open"></i></a>
     @endif
     @if(($alerta->status ?? '') === 'aberto')
         <form method="post" action="{{ url('/busca-ativa/alertas/'.$alerta->id.'/resolver') }}">@csrf
             <button class="botao claro" type="submit">Resolver</button>
         </form>
-        <a class="botao" href="{{ url('/atendimento-estudante/registro?'.http_build_query([
-            'aluno_id' => $alerta->ref_cod_aluno,
+        <a class="botao icone" href="{{ url('/atendimento-estudante/registro?'.http_build_query([
+            'aluno_id' = title="$alerta->ref_cod_aluno, 'aluno' => $alerta->aluno_nome, 'motivo' => $alerta->motivo, 'alerta_id' => $alerta->id, ])) }}&quot;> Atender família" aria-label="$alerta->ref_cod_aluno, 'aluno' => $alerta->aluno_nome, 'motivo' => $alerta->motivo, 'alerta_id' => $alerta->id, ])) }}&quot;> Atender família">$alerta->ref_cod_aluno,
             'aluno' => $alerta->aluno_nome,
             'motivo' => $alerta->motivo,
             'alerta_id' => $alerta->id,
-        ])) }}"><i class="fa fa-handshake-o"></i> Atender família</a>
+        ])) }}"><i aria-hidden="true" class="fa fa-handshake-o"></i></a>
     @endif
 @endsection
 @section('conteudo')

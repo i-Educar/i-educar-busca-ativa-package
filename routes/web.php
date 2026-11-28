@@ -15,6 +15,7 @@ Route::prefix('busca-ativa')->group(function (): void {
     Route::get('/configuracao', [BuscaAtivaController::class, 'configuracao']);
     Route::post('/configuracao', [BuscaAtivaController::class, 'salvarConfiguracao']);
     Route::get('/relatorios', [BuscaAtivaController::class, 'relatorios']);
+    Route::post('/relatorios/exportar', [BuscaAtivaController::class, 'exportarRelatorios']);
     Route::redirect('/api-tokens', '/apps-api/governanca');
     Route::get('/api-tokens-info', static fn () => view('busca-ativa::api-tokens'));
     // Tokens/API família: módulo Apps da rede (/apps-api) — Sanctum

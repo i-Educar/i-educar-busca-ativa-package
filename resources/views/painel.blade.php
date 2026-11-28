@@ -9,9 +9,9 @@
 @section('acoes-topo')
     <form method="post" action="{{ url('/busca-ativa/detectar') }}" style="display:inline">
         @csrf
-        <button class="botao" type="submit"><i class="fa fa-refresh"></i> Rodar detecção</button>
+        <button class="botao icone" type="submit" title="Rodar detecção" aria-label="Rodar detecção"><i aria-hidden="true" class="fa fa-refresh"></i></button>
     </form>
-    <a class="botao claro" href="{{ url('/busca-ativa/configuracao') }}"><i class="fa fa-cog"></i> Regras</a>
+    <a class="botao claro icone" href="{{ url('/busca-ativa/configuracao') }}" title="Regras" aria-label="Regras"><i aria-hidden="true" class="fa fa-cog"></i></a>
 @endsection
 @section('conteudo')
     @include('buriti-ui::painel-corpo', [

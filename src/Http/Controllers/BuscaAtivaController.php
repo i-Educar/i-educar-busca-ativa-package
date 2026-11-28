@@ -5,6 +5,7 @@ namespace iEducar\Packages\BuritiBuscaAtiva\Http\Controllers;
 use iEducar\Packages\BuritiBuscaAtiva\Services\ConfiguracaoService;
 use iEducar\Packages\BuritiBuscaAtiva\Services\DetectorInfrequencia;
 use iEducar\Packages\BuritiBuscaAtiva\Services\ProcessoService;
+use iEducar\Packages\BuritiBuscaAtiva\Services\RelatorioGestao;
 use iEducar\Packages\BuritiBuscaAtiva\Support\Acesso;
 use iEducar\Packages\BuritiBuscaAtiva\Support\EtapasProcesso;
 use iEducar\Packages\BuritiBuscaAtiva\Support\Processos;
@@ -14,6 +15,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class BuscaAtivaController extends Controller
 {
@@ -91,7 +93,7 @@ class BuscaAtivaController extends Controller
                     'icone' => 'fa-mobile',
                     'tom' => 'var(--destaque)',
                     'corpo' => 'Consultas e acompanhamento familiar ficam em Apps da rede (tokens Sanctum), não nesta tela.',
-                    'url' => '/apps-api/configuracao',
+                    'url' => '/configuracoes/modulos?modulo=apps-api',
                 ],
             ],
             'analise' => $analise ?: [[
@@ -103,11 +105,11 @@ class BuscaAtivaController extends Controller
             'analiseTitulo' => 'Últimos alertas',
             'resumo' => 'Fluxo: detectar → alertas → processos (etapas) → retorno/encerramento. API família no módulo Apps.',
             'atalhos' => [
-                ['url' => '/busca-ativa/alertas', 'icone' => 'fa-bell', 'rotulo' => '1. Alertas', 'meta' => 'Infrequência'],
-                ['url' => '/busca-ativa/processos', 'icone' => 'fa-folder-open', 'rotulo' => '2. Processos', 'meta' => 'Etapas'],
-                ['url' => '/busca-ativa/configuracao', 'icone' => 'fa-cog', 'rotulo' => '3. Regras', 'meta' => 'Limites'],
-                ['url' => '/busca-ativa/relatorios', 'icone' => 'fa-bar-chart', 'rotulo' => '4. Relatórios', 'meta' => 'Síntese'],
-                ['url' => '/apps-api/configuracao', 'icone' => 'fa-mobile', 'rotulo' => 'Apps API', 'meta' => 'Família / tokens'],
+                ['url' => '/busca-ativa/alertas', 'icone' => 'fa-bell', 'rotulo' => 'Alertas', 'meta' => 'Infrequência'],
+                ['url' => '/busca-ativa/processos', 'icone' => 'fa-folder-open', 'rotulo' => 'Processos', 'meta' => 'Etapas'],
+                ['url' => '/configuracoes/modulos?modulo=busca-ativa', 'icone' => 'fa-cog', 'rotulo' => 'Regras', 'meta' => 'Limites'],
+                ['url' => '/busca-ativa/relatorios', 'icone' => 'fa-bar-chart', 'rotulo' => 'Relatórios', 'meta' => 'Síntese'],
+                ['url' => '/configuracoes/modulos?modulo=apps-api', 'icone' => 'fa-mobile', 'rotulo' => 'Apps API', 'meta' => 'Família / tokens'],
             ],
             'fluxoTitulo' => 'Fluxo da Busca Ativa',
             'porEtapa' => $porEtapa,
@@ -183,6 +185,14 @@ class BuscaAtivaController extends Controller
             'resolvido_em' => now(),
             'updated_at' => now(),
         ]);
+
+        if (class_exists(\iEducar\Packages\BuritiLagunaAmbiente\Support\Notificador::class)) {
+            \iEducar\Packages\BuritiLagunaAmbiente\Support\Notificador::paraProcesso(
+                Processos::PROCESSOS,
+                'Busca ativa: alerta #'.$id.' resolvido.',
+                '/busca-ativa/alertas/'.$id,
+            );
+        }
 
         return back()->with('ok', 'Alerta resolvido.');
     }
@@ -271,61 +281,85 @@ class BuscaAtivaController extends Controller
         return back()->with('ok', 'Processo atualizado.');
     }
 
-    public function configuracao(): View
+    public function configuracao(): RedirectResponse
     {
         abort_unless(Acesso::pode(Processos::CONFIGURACAO), 403);
-        $cfg = ConfiguracaoService::obter();
-        $cursos = Schema::hasColumn('pmieducar.curso', 'busca_ativa')
-            ? DB::table('pmieducar.curso')->where('ativo', 1)->orderBy('nm_curso')
-                ->get(['cod_curso', 'nm_curso', 'busca_ativa'])
-            : collect();
 
-        return view('busca-ativa::configuracao', compact('cfg', 'cursos'));
+        return redirect('/configuracoes/modulos?modulo=busca-ativa')
+            ->with('ok', 'Flags e limites da Busca Ativa ficam em Configurações → Módulos.');
     }
 
     public function salvarConfiguracao(Request $request): RedirectResponse
     {
         abort_unless(Acesso::pode(Processos::CONFIGURACAO, 'cadastra'), 403);
-        ConfiguracaoService::salvar([
-            'faltas_consecutivas_alerta' => (int) $request->input('faltas_consecutivas_alerta', 3),
-            'faltas_mensais_alerta' => (int) $request->input('faltas_mensais_alerta', 5),
-            'frequencia_minima_percentual' => (float) $request->input('frequencia_minima_percentual', 75),
-            'dias_sem_contato_escalar' => (int) $request->input('dias_sem_contato_escalar', 7),
-            'gerar_alerta_atendimento' => $request->boolean('gerar_alerta_atendimento'),
-            'notificar_familia' => $request->boolean('notificar_familia'),
-            'somente_cursos_marcados' => $request->boolean('somente_cursos_marcados'),
-            'abrir_processo_automatico' => $request->boolean('abrir_processo_automatico'),
-            'ativo' => $request->boolean('ativo'),
-        ]);
 
-        if (Schema::hasColumn('pmieducar.curso', 'busca_ativa')) {
-            $marcados = array_map('intval', (array) $request->input('cursos_busca_ativa', []));
-            DB::table('pmieducar.curso')->where('ativo', 1)->update(['busca_ativa' => false]);
-            if ($marcados !== []) {
-                DB::table('pmieducar.curso')->whereIn('cod_curso', $marcados)->update(['busca_ativa' => true]);
-            }
-        }
-
-        return back()->with('ok', 'Configuração salva.');
+        return redirect('/configuracoes/modulos?modulo=busca-ativa')
+            ->with('ok', 'Use Configurações → Módulos para salvar as diretivas da Busca Ativa.');
     }
 
     public function relatorios(): View
     {
         abort_unless(Acesso::pode(Processos::RELATORIOS), 403);
-        $porTipo = Schema::hasTable('busca_ativa.alerta')
-            ? DB::table('busca_ativa.alerta')->select('tipo', DB::raw('count(*) as total'))->groupBy('tipo')->get()
-            : collect();
-        $porStatus = Schema::hasTable('busca_ativa.processo')
-            ? DB::table('busca_ativa.processo')->select('status', DB::raw('count(*) as total'))->groupBy('status')->get()
-            : collect();
-        $porEtapa = Schema::hasTable('busca_ativa.processo')
-            ? DB::table('busca_ativa.processo')
-                ->where('status', 'aberto')
-                ->select('etapa_atual', DB::raw('count(*) as total'))
-                ->groupBy('etapa_atual')
-                ->get()
-            : collect();
 
-        return view('busca-ativa::relatorios', compact('porTipo', 'porStatus', 'porEtapa'));
+        return view('busca-ativa::relatorios', RelatorioGestao::montar(120));
+    }
+
+    public function exportarRelatorios(Request $request): Response|RedirectResponse
+    {
+        abort_unless(Acesso::pode(Processos::RELATORIOS), 403);
+
+        $item = strtolower(trim((string) $request->input('item', 'alunos')));
+        $formato = strtolower(trim((string) $request->input('formato', $item === 'alunos' ? 'xlsx' : 'pdf')));
+
+        if ($item === 'alunos') {
+            $alunos = RelatorioGestao::listaAlunos(2000);
+
+            return \iEducar\Packages\BuritiExportacaoUnificada\Support\ExportacaoModulo::download(
+                'Lista de alunos — Busca Ativa',
+                RelatorioGestao::cabecalhosExcelAlunos(),
+                RelatorioGestao::linhasExcelAlunos($alunos),
+                'Busca ativa',
+                $formato !== '' ? $formato : 'xlsx',
+                count($alunos).' registro(s) · gestão da frequência e permanência escolar',
+                null,
+                'busca-ativa-alunos',
+            );
+        }
+
+        $dados = RelatorioGestao::montar(1);
+        $linhas = [];
+        foreach ($dados['porTipo'] as $r) {
+            $linhas[] = ['Alertas por tipo', $r['chave'], $r['total']];
+        }
+        foreach ($dados['porSeveridade'] as $r) {
+            $linhas[] = ['Alertas por severidade', $r['chave'], $r['total']];
+        }
+        foreach ($dados['porStatusAlerta'] as $r) {
+            $linhas[] = ['Alertas por status', $r['chave'], $r['total']];
+        }
+        foreach ($dados['porStatusProcesso'] as $r) {
+            $linhas[] = ['Processos por status', $r['chave'], $r['total']];
+        }
+        foreach ($dados['porEtapa'] as $r) {
+            $linhas[] = ['Processos abertos por etapa', $r['rotulo'], $r['total']];
+        }
+        foreach ($dados['porEscola'] as $r) {
+            $linhas[] = ['Alertas abertos por escola', $r['chave'], $r['total']];
+        }
+        foreach ($dados['qualidade'] as $q) {
+            $linhas[] = ['Indicador de qualidade', $q['rotulo'], $q['valor']];
+        }
+
+        return \iEducar\Packages\BuritiExportacaoUnificada\Support\ExportacaoModulo::download(
+            'Relatórios — Busca Ativa',
+            ['Dimensão', 'Chave', 'Total'],
+            $linhas,
+            'Busca ativa',
+            $formato !== '' ? $formato : 'pdf',
+            'Síntese gerencial de alertas, processos e qualidade',
+            null,
+            'busca-ativa-relatorios',
+        );
     }
 }
+

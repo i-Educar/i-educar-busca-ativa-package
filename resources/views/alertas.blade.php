@@ -6,7 +6,7 @@
 @section('lead') Alertas gerados a partir das faltas dos alunos em cursos elegíveis. @endsection
 @section('acoes-topo')
     <form method="post" action="{{ url('/busca-ativa/detectar') }}">@csrf
-        <button class="botao" type="submit"><i class="fa fa-refresh"></i> Detectar agora</button>
+        <button class="botao icone" type="submit" title="Detectar agora" aria-label="Detectar agora"><i aria-hidden="true" class="fa fa-refresh"></i></button>
     </form>
 @endsection
 @section('conteudo')
